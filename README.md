@@ -4,11 +4,11 @@
 Upload your Excel or CSV file and instantly get beautiful dashboards + chat with AI in English or Urdu.
 
 ![DataMagic Lite](https://via.placeholder.com/800x400?text=DataMagic+Lite+Dashboard)  
-*(Add screenshot here later)*
+*(Replace with actual screenshot later)*
 
 ---
 
-##  Features
+## 🚀 Features
 
 - **File Upload** — Support for Excel (.xlsx) and CSV files
 - **Auto Dashboard** — Automatically generates 6-8 insightful charts
@@ -26,14 +26,14 @@ Upload your Excel or CSV file and instantly get beautiful dashboards + chat with
 ### Frontend
 - React + Vite + TypeScript
 - Tailwind CSS
-- Recharts (for charts)
+- Recharts
 - Supabase Auth
 
 ### Backend
 - FastAPI (Python)
-- Pandas (Data Processing)
+- Pandas
 - Groq / Claude (AI)
-- Supabase (Database & Auth)
+- Supabase (Auth & Database)
 
 ---
 
@@ -41,5 +41,5 @@ Upload your Excel or CSV file and instantly get beautiful dashboards + chat with
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/yourusername/datamagic-lite.git
+git clone https://github.com/malikamjid01/datamagic-lite.git
 cd datamagic-lite
