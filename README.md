@@ -6,7 +6,7 @@ Upload your Excel or CSV file and instantly get beautiful dashboards + chat with
 
 ---
 
-## 🚀 Features
+##  Features
 
 * File Upload — Support for Excel (.xlsx) and CSV files
 * Auto Dashboard — Automatically generates 6-8 insightful charts
@@ -40,7 +40,7 @@ Upload your Excel or CSV file and instantly get beautiful dashboards + chat with
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 
 DataMagic-Lite/
 
@@ -101,50 +101,10 @@ DataMagic-Lite/
 ├── README.md
 └── LICENSE
 
----
-
-## 👥 Team Responsibilities
-
-### Muhammad Amjad Malik
-
-* Frontend Lead
-* Dashboard
-* Upload Page
-* API Integration
-* Charts
-* Final Integration
-
-### Ahmad Abdul Manan
-
-* UI/UX Design
-* Figma Design
-* Layouts
-* Color System
-
-### Areeba Zaib
-
-* React Components
-* Chat UI
-* Responsive Design
-* Drag & Drop Features
-
-### Saud Qayyum
-
-* FastAPI Backend
-* Pandas Processing
-* Dashboard Logic
-* AI Integration
-
-### Abdul Wasay
-
-* GitHub Management
-* Testing
-* Documentation
-* Bug Reporting
 
 ---
 
-## 🎯 MVP Scope
+##  MVP Scope
 
 1. Upload CSV/Excel
 2. Auto Dashboard Generation
@@ -170,11 +130,7 @@ uvicorn app.main:app --reload
 
 ---
 
-## 📅 Deadline
 
-* Development Complete: Monday
-* Integration & Testing: Tuesday
-* Final Presentation: Tuesday
 
 ---
 
