@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { BarChart3, Upload, Database, TrendingUp } from 'lucide-react'
 import { DashboardLayout } from '../components/layout/DashboardLayout'
 import { Card } from '../components/common/Card'
-import { Loading } from '../components/common/Loading'
+import { LoadingSpinner } from '../components/common/Loading';
 import { ChartCard } from '../components/charts/ChartCard'
 import { dashboardApi } from '../api/dashboard'
 import { datasetsApi } from '../api/datasets'
