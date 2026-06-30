@@ -7,58 +7,28 @@ interface FilePreviewProps {
   isLoading?: boolean;
 }
 
-const statusColors = {
+const statusColors: Record<string, string> = {
   processing: 'bg-yellow-100 text-yellow-700',
   ready: 'bg-green-100 text-green-700',
   error: 'bg-red-100 text-red-700',
 };
 
-const formatFileSize = (bytes: number) => {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-};
-
 const FilePreview = ({ dataset, onDelete, isLoading = false }: FilePreviewProps) => {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 flex items-center justify-between">
-      {/* File Info */}
       <div className="flex items-center gap-4">
         <span className="text-3xl">📄</span>
         <div>
-          <p className="font-medium text-gray-800">{dataset.fileName}</p>
+          <p className="font-medium text-gray-800">{dataset.filename}</p>
           <div className="flex items-center gap-3 mt-1">
-            <span className="text-xs text-gray-500">
-              {formatFileSize(dataset.fileSize)}
-            </span>
-            {dataset.rowCount && (
-              <span className="text-xs text-gray-500">
-                {dataset.rowCount} rows
-              </span>
-            )}
-            {dataset.columnCount && (
-              <span className="text-xs text-gray-500">
-                {dataset.columnCount} columns
-              </span>
-            )}
-            <span
-              className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                statusColors[dataset.status]
-              }`}
-            >
-              {dataset.status}
+            <span className="text-xs text-gray-500">{dataset.rows} rows</span>
+            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusColors['ready']}`}>
+              ready
             </span>
           </div>
         </div>
       </div>
-
-      {/* Delete Button */}
-      <Button
-        label="Delete"
-        variant="danger"
-        isLoading={isLoading}
-        onClick={() => onDelete(dataset.id)}
-      />
+      <Button label="Delete" variant="danger" isLoading={isLoading} onClick={() => onDelete(dataset.id)} />
     </div>
   );
 };

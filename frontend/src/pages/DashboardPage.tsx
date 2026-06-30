@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import {
   BarChart2,
   Database,
@@ -21,12 +21,12 @@ import type { Dashboard, TableData } from "../types";
 import useDataset from "../hooks/useDataset";
 import { useTheme } from "../context/ThemeContext";
 
-const fadeUp = {
+const fadeUp: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.08, duration: 0.4, ease: "easeOut" },
+    transition: { delay: i * 0.08, duration: 0.4, ease: "easeOut" as const },
   }),
 };
 
@@ -66,7 +66,6 @@ const DashboardPage = () => {
     }
   }, [activeTab, selectedDatasetId]);
 
-  // Load table data when insights card needs it
   useEffect(() => {
     if (dashboard && selectedDatasetId && !tableData) {
       loadTableData(selectedDatasetId);
@@ -109,7 +108,6 @@ const DashboardPage = () => {
   return (
     <DashboardLayout title="Dashboard">
       <div className="flex flex-col gap-6 max-w-7xl mx-auto">
-        {/* Dataset Selector */}
         {datasets.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
@@ -144,14 +142,12 @@ const DashboardPage = () => {
           </motion.div>
         )}
 
-        {/* Error */}
         {error && (
           <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm px-4 py-3 rounded-xl">
             {error}
           </div>
         )}
 
-        {/* No Dataset */}
         {datasets.length === 0 && !isChartsLoading && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -176,7 +172,6 @@ const DashboardPage = () => {
           </motion.div>
         )}
 
-        {/* KPI Cards */}
         {dashboard && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {dashboard.summary.kpis.map((kpi, index) => {
@@ -226,7 +221,6 @@ const DashboardPage = () => {
           </div>
         )}
 
-        {/* AI Insights Card */}
         {dashboard && (
           <InsightsCard
             datasetId={selectedDatasetId}
@@ -239,7 +233,6 @@ const DashboardPage = () => {
           />
         )}
 
-        {/* Tabs */}
         {dashboard && (
           <div
             className={`flex items-center gap-1 p-1 rounded-xl w-fit border ${
@@ -277,7 +270,6 @@ const DashboardPage = () => {
           </div>
         )}
 
-        {/* Charts Tab */}
         {activeTab === "charts" &&
           (isChartsLoading ? (
             <Loading message="Loading charts..." />
@@ -297,7 +289,6 @@ const DashboardPage = () => {
             </div>
           ))}
 
-        {/* Table Tab */}
         {activeTab === "table" && (
           <div
             className={`backdrop-blur-sm border rounded-2xl p-5 ${
@@ -328,7 +319,6 @@ const DashboardPage = () => {
         )}
       </div>
 
-      {/* Floating Chat Button */}
       {selectedDatasetId && !isChatOpen && (
         <motion.button
           initial={{ scale: 0 }}
@@ -340,7 +330,6 @@ const DashboardPage = () => {
         </motion.button>
       )}
 
-      {/* Chat Sidebar */}
       <ChatSidebar
         datasetId={selectedDatasetId}
         isOpen={isChatOpen}

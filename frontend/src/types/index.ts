@@ -11,3 +11,6 @@ export interface ApiResponse<T> {
 
 export type { Dashboard } from './chart';
 export type { TableData } from './dataset';
+export type { ChartData, ChartType, KPI } from './chart';
+export type { Dataset, UploadResponse, ColumnInfo } from './dataset';
+export type { Message, ChatSession, ChatResponse } from './chat';
