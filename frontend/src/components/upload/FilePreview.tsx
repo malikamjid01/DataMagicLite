@@ -1,30 +1,66 @@
-import { FileText, X } from 'lucide-react'
-import { formatBytes } from '../../utils/formatters'
+import type { Dataset } from '../../types';
+import Button from '../common/Button';
 
 interface FilePreviewProps {
-  file: File
-  progress?: number
-  onRemove: () => void
+  dataset: Dataset;
+  onDelete: (id: string) => void;
+  isLoading?: boolean;
 }
 
-export function FilePreview({ file, progress, onRemove }: FilePreviewProps) {
+const statusColors = {
+  processing: 'bg-yellow-100 text-yellow-700',
+  ready: 'bg-green-100 text-green-700',
+  error: 'bg-red-100 text-red-700',
+};
+
+const formatFileSize = (bytes: number) => {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
+
+const FilePreview = ({ dataset, onDelete, isLoading = false }: FilePreviewProps) => {
   return (
-    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-200">
-      <div className="w-9 h-9 rounded-lg bg-primary-100 flex items-center justify-center flex-shrink-0">
-        <FileText size={18} className="text-primary-600" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-gray-800 truncate">{file.name}</p>
-        <p className="text-xs text-gray-400">{formatBytes(file.size)}</p>
-        {progress !== undefined && progress > 0 && (
-          <div className="mt-1.5 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-            <div className="h-full bg-primary-500 transition-all" style={{ width: `${progress}%` }} />
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 flex items-center justify-between">
+      {/* File Info */}
+      <div className="flex items-center gap-4">
+        <span className="text-3xl">📄</span>
+        <div>
+          <p className="font-medium text-gray-800">{dataset.fileName}</p>
+          <div className="flex items-center gap-3 mt-1">
+            <span className="text-xs text-gray-500">
+              {formatFileSize(dataset.fileSize)}
+            </span>
+            {dataset.rowCount && (
+              <span className="text-xs text-gray-500">
+                {dataset.rowCount} rows
+              </span>
+            )}
+            {dataset.columnCount && (
+              <span className="text-xs text-gray-500">
+                {dataset.columnCount} columns
+              </span>
+            )}
+            <span
+              className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                statusColors[dataset.status]
+              }`}
+            >
+              {dataset.status}
+            </span>
           </div>
-        )}
+        </div>
       </div>
-      <button onClick={onRemove} className="p-1 rounded-lg hover:bg-gray-200 text-gray-400 flex-shrink-0">
-        <X size={16} />
-      </button>
+
+      {/* Delete Button */}
+      <Button
+        label="Delete"
+        variant="danger"
+        isLoading={isLoading}
+        onClick={() => onDelete(dataset.id)}
+      />
     </div>
-  )
-}
+  );
+};
+
+export default FilePreview;

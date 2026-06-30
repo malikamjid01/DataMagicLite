@@ -1,24 +1,37 @@
-import apiClient from './client'
-import type { Dataset, DatasetPreview } from '../types'
+import apiClient from './client';
 
-export const datasetsApi = {
-  upload: (file: File, onProgress?: (pct: number) => void) => {
-    const form = new FormData()
-    form.append('file', file)
-    return apiClient.post<Dataset>('/api/upload', form, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-      onUploadProgress: (e) => {
-        if (onProgress && e.total) onProgress(Math.round((e.loaded * 100) / e.total))
-      },
-    }).then(r => r.data)
-  },
+export const uploadDataset = async (file: File) => {
+  const { data } = await import('../lib/supabase').then(m =>
+    m.supabase.auth.getSession()
+  );
+  const token = data.session?.access_token;
 
-  list: () =>
-    apiClient.get<Dataset[]>('/api/datasets').then(r => r.data),
+  const formData = new FormData();
+  formData.append('file', file);
 
-  preview: (id: string) =>
-    apiClient.get<DatasetPreview>(`/api/datasets/${id}/preview`).then(r => r.data),
+  const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/datasets/upload`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
 
-  delete: (id: string) =>
-    apiClient.delete(`/api/datasets/${id}`).then(r => r.data),
-}
+  const body = await res.json();
+  if (!res.ok) throw new Error(body.detail || 'Upload failed');
+  return body;
+};
+
+export const getDatasets = async () => {
+  return await apiClient('/datasets');
+};
+
+export const getDatasetTable = async (datasetId: string) => {
+  return await apiClient(`/datasets/${datasetId}/table`);
+};
+
+export const deleteDataset = async (datasetId: string) => {
+  return await apiClient(`/datasets/${datasetId}`, {
+    method: 'DELETE',
+  });
+};

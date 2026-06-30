@@ -1,59 +1,87 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
-import { authApi } from '../api/auth'
-import type { User } from '../types'
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import type { User } from '../types';
+import { supabase } from '../lib/supabase';
+import { login, signup, logout } from '../api/auth';
 
 interface AuthContextType {
-  user: User | null
-  loading: boolean
-  isAuthenticated: boolean
-  signIn: (email: string, password: string) => Promise<void>
-  signOut: () => Promise<void>
+  user: User | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  loginUser: (email: string, password: string) => Promise<void>;
+  signupUser: (email: string, password: string) => Promise<void>;
+  logoutUser: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined)
+const AuthContext = createContext<AuthContextType | null>(null);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Restore session from localStorage on page load
-    const token = localStorage.getItem('auth_token')
-    const stored = localStorage.getItem('auth_user')
-    if (token && stored) {
-      try { setUser(JSON.parse(stored)) } catch { /* ignore */ }
-    }
-    setLoading(false)
-  }, [])
+    // Current session check karo
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session?.user) {
+        setUser({
+          id: data.session.user.id,
+          email: data.session.user.email || '',
+        });
+      }
+      setIsLoading(false);
+    });
 
-  const signIn = async (email: string, password: string) => {
-    setLoading(true)
-    try {
-      const data = await authApi.login({ email, password })
-      localStorage.setItem('auth_token', data.access_token)
-      const u: User = { id: data.user.email, email: data.user.email, full_name: data.user.name, role: data.user.role }
-      localStorage.setItem('auth_user', JSON.stringify(u))
-      setUser(u)
-    } finally {
-      setLoading(false)
-    }
-  }
+    // Auth state changes listen karo
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setUser({
+          id: session.user.id,
+          email: session.user.email || '',
+        });
+      } else {
+        setUser(null);
+      }
+    });
 
-  const signOut = async () => {
-    localStorage.removeItem('auth_token')
-    localStorage.removeItem('auth_user')
-    setUser(null)
-  }
+    return () => listener.subscription.unsubscribe();
+  }, []);
+
+  const loginUser = async (email: string, password: string) => {
+    const data = await login(email, password);
+    if (data.user) {
+      setUser({
+        id: data.user.id,
+        email: data.user.email || '',
+      });
+    }
+  };
+
+  const signupUser = async (email: string, password: string) => {
+    await signup(email, password);
+  };
+
+  const logoutUser = async () => {
+    await logout();
+    setUser(null);
+  };
 
   return (
-    <AuthContext.Provider value={{ user, loading, isAuthenticated: !!user, signIn, signOut }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        isLoading,
+        isAuthenticated: !!user,
+        loginUser,
+        signupUser,
+        logoutUser,
+      }}
+    >
       {children}
     </AuthContext.Provider>
-  )
-}
+  );
+};
 
-export function useAuthContext() {
-  const ctx = useContext(AuthContext)
-  if (!ctx) throw new Error('useAuthContext must be used inside AuthProvider')
-  return ctx
-}
+export const useAuthContext = () => {
+  const context = useContext(AuthContext);
+  if (!context) throw new Error('useAuthContext must be used within AuthProvider');
+  return context;
+};

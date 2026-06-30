@@ -1,60 +1,60 @@
-import { useState, useCallback } from 'react'
-import { datasetsApi } from '../api/datasets'
-import type { Dataset, DatasetPreview } from '../types'
+import { useState } from 'react';
+import type { Dataset } from '../types';
+import { getDatasets, uploadDataset, deleteDataset } from '../api/datasets';
 
-export function useDataset() {
-  const [datasets, setDatasets] = useState<Dataset[]>([])
-  const [preview, setPreview] = useState<DatasetPreview | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [uploadProgress, setUploadProgress] = useState(0)
+const useDataset = () => {
+  const [datasets, setDatasets] = useState<Dataset[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const fetchDatasets = useCallback(async () => {
-    setLoading(true)
-    setError(null)
+  const fetchDatasets = async () => {
     try {
-      const data = await datasetsApi.list()
-      setDatasets(data)
-    } catch (e: any) {
-      setError(e?.response?.data?.detail || 'Failed to load datasets')
+      setIsLoading(true);
+      setError(null);
+      const data = await getDatasets();
+      setDatasets(data.datasets || []);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Error aya');
     } finally {
-      setLoading(false)
+      setIsLoading(false);
     }
-  }, [])
+  };
 
-  const upload = useCallback(async (file: File) => {
-    setLoading(true)
-    setError(null)
-    setUploadProgress(0)
+  const upload = async (file: File) => {
     try {
-      const dataset = await datasetsApi.upload(file, setUploadProgress)
-      setDatasets(prev => [dataset, ...prev])
-      return dataset
-    } catch (e: any) {
-      setError(e?.response?.data?.detail || 'Upload failed')
-      throw e
+      setIsLoading(true);
+      setError(null);
+      const response = await uploadDataset(file);
+      await fetchDatasets();
+      return response;
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Upload error aya');
     } finally {
-      setLoading(false)
-      setUploadProgress(0)
+      setIsLoading(false);
     }
-  }, [])
+  };
 
-  const fetchPreview = useCallback(async (id: string) => {
-    setLoading(true)
+  const remove = async (id: string) => {
     try {
-      const data = await datasetsApi.preview(id)
-      setPreview(data)
-    } catch (e: any) {
-      setError(e?.response?.data?.detail || 'Failed to load preview')
+      setIsLoading(true);
+      setError(null);
+      await deleteDataset(id);
+      setDatasets((prev) => prev.filter((d) => d.id !== id));
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Delete error aya');
     } finally {
-      setLoading(false)
+      setIsLoading(false);
     }
-  }, [])
+  };
 
-  const remove = useCallback(async (id: string) => {
-    await datasetsApi.delete(id)
-    setDatasets(prev => prev.filter(d => d.id !== id))
-  }, [])
+  return {
+    datasets,
+    isLoading,
+    error,
+    fetchDatasets,
+    upload,
+    remove,
+  };
+};
 
-  return { datasets, preview, loading, error, uploadProgress, fetchDatasets, upload, fetchPreview, remove }
-}
+export default useDataset;

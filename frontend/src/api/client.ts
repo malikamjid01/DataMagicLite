@@ -1,32 +1,29 @@
-import axios from 'axios'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+async function apiClient(path: string, options: RequestInit = {}) {
+  // Supabase token lo
+  const { data } = await import('../lib/supabase').then(m => 
+    m.supabase.auth.getSession()
+  );
+  const token = data.session?.access_token;
 
-export const apiClient = axios.create({
-  baseURL: BASE_URL,
-  headers: { 'Content-Type': 'application/json' },
-  timeout: 30000,
-})
+  const res = await fetch(`${API_BASE_URL}${path}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+      ...options.headers,
+    },
+  });
 
-// Attach auth token to every request
-apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('auth_token')
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
+  if (res.status === 401) {
+    window.location.href = '/login';
+    throw new Error('Session expired');
   }
-  return config
-})
 
-// Global error handler
-apiClient.interceptors.response.use(
-  (res) => res,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('auth_token')
-      window.location.href = '/login'
-    }
-    return Promise.reject(error)
-  }
-)
+  const body = await res.json();
+  if (!res.ok) throw new Error(body.detail || 'Request failed');
+  return body;
+}
 
-export default apiClient
+export default apiClient;

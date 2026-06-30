@@ -1,39 +1,68 @@
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
-import { useAuthContext } from './context/AuthContext'
-import type { ReactElement } from 'react'
+import { Routes, Route, Navigate } from "react-router-dom";
+import Login from "./pages/auth/Login";
+import Signup from "./pages/auth/Signup";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import UploadPage from "./pages/UploadPage";
+import DashboardPage from "./pages/DashboardPage";
+import NotFound from "./pages/NotFound";
+import LandingPage from "./pages/LandingPage";
+import useAuth from "./hooks/useAuth";
+import Loading from "./components/common/Loading";
 
-// Auth pages (no layout)
-import Login from './pages/auth/Login'
-import Signup from './pages/auth/Signup'
-import ForgotPassword from './pages/auth/ForgotPassword'
+const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated, isLoading } = useAuth();
+  if (isLoading) return <Loading fullScreen message="Loading..." />;
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  return <>{children}</>;
+};
 
-// App pages (with layout)
-import DashboardPage from './pages/DashboardPage'
-import UploadPage from './pages/UploadPage'
-import NotFound from './pages/NotFound'
+const AppRoutes = () => {
+  const { isAuthenticated, isLoading } = useAuth();
 
-function ProtectedRoute({ children }: { children: ReactElement }) {
-  const { isAuthenticated, loading } = useAuthContext()
-  const location = useLocation()
-  if (loading) return null
-  if (!isAuthenticated) return <Navigate to="/login" state={{ from: location }} replace />
-  return children
-}
+  if (isLoading) return <Loading fullScreen message="Loading..." />;
 
-export function AppRoutes() {
   return (
     <Routes>
-      {/* Public */}
-      <Route path="/login"           element={<Login />} />
-      <Route path="/signup"          element={<Signup />} />
+      {/* Landing Page — hamesha show ho */}
+      <Route path="/" element={<LandingPage />} />
+
+      {/* Auth Routes — logged in ho to dashboard */}
+      <Route
+        path="/login"
+        element={
+          isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />
+        }
+      />
+      <Route
+        path="/signup"
+        element={
+          isAuthenticated ? <Navigate to="/dashboard" replace /> : <Signup />
+        }
+      />
       <Route path="/forgot-password" element={<ForgotPassword />} />
 
-      {/* Protected */}
-      <Route path="/" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-      <Route path="/upload" element={<ProtectedRoute><UploadPage /></ProtectedRoute>} />
+      {/* Private Routes */}
+      <Route
+        path="/dashboard"
+        element={
+          <PrivateRoute>
+            <DashboardPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/upload"
+        element={
+          <PrivateRoute>
+            <UploadPage />
+          </PrivateRoute>
+        }
+      />
 
-      {/* Catch-all */}
+      {/* 404 */}
       <Route path="*" element={<NotFound />} />
     </Routes>
-  )
-}
+  );
+};
+
+export default AppRoutes;

@@ -1,43 +1,64 @@
-import { useCallback, useState } from 'react'
-import { Upload, FileText } from 'lucide-react'
+import { useDropzone } from "react-dropzone";
+import { useCallback } from "react";
 
 interface UploadZoneProps {
-  onFile: (file: File) => void
-  accept?: string
-  disabled?: boolean
+  onFileSelect: (file: File) => void;
+  isLoading?: boolean;
 }
 
-export function UploadZone({ onFile, accept = '.csv,.xlsx,.xls', disabled }: UploadZoneProps) {
-  const [dragging, setDragging] = useState(false)
+const UploadZone = ({ onFileSelect, isLoading = false }: UploadZoneProps) => {
+  const onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      if (acceptedFiles.length > 0) {
+        onFileSelect(acceptedFiles[0]);
+      }
+    },
+    [onFileSelect],
+  );
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    setDragging(false)
-    const file = e.dataTransfer.files[0]
-    if (file) onFile(file)
-  }, [onFile])
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      "text/csv": [".csv"],
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [
+        ".xlsx",
+      ],
+      "application/vnd.ms-excel": [".xls"],
+    },
+    multiple: false,
+    disabled: isLoading,
+  });
 
   return (
-    <label
-      className={`
-        flex flex-col items-center justify-center gap-3 p-10 border-2 border-dashed rounded-2xl cursor-pointer
-        transition-all duration-200
-        ${dragging ? 'border-primary-400 bg-primary-50' : 'border-gray-300 hover:border-primary-400 hover:bg-gray-50'}
-        ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
-      `}
-      onDragOver={e => { e.preventDefault(); setDragging(true) }}
-      onDragLeave={() => setDragging(false)}
-      onDrop={handleDrop}
+    <div
+      {...getRootProps()}
+      className={`border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-all duration-200 ${
+        isDragActive
+          ? "border-blue-500 bg-blue-50"
+          : "border-gray-300 hover:border-blue-400 hover:bg-gray-50"
+      } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
     >
-      <div className="w-14 h-14 rounded-2xl bg-primary-50 flex items-center justify-center">
-        <Upload size={24} className="text-primary-500" />
+      <input {...getInputProps()} />
+      <div className="flex flex-col items-center gap-3">
+        <span className="text-5xl">📂</span>
+        {isDragActive ? (
+          <p className="text-blue-500 font-medium">File yahan drop karo!</p>
+        ) : (
+          <>
+            <p className="text-gray-600 font-medium">
+              File drag & drop karo ya click karo
+            </p>
+            <p className="text-gray-400 text-sm">
+              Supported formats: CSV, XLS, XLSX
+            </p>
+          </>
+        )}
+        {isLoading && (
+          <p className="text-blue-500 text-sm font-medium">Uploading...</p>
+        )}
       </div>
-      <div className="text-center">
-        <p className="text-sm font-medium text-gray-700">Drop your file here, or <span className="text-primary-600">browse</span></p>
-        <p className="text-xs text-gray-400 mt-1">Supports CSV, XLSX, XLS</p>
-      </div>
-      <input type="file" className="sr-only" accept={accept} disabled={disabled}
-        onChange={e => { const f = e.target.files?.[0]; if (f) onFile(f) }} />
-    </label>
-  )
-}
+    </div>
+  );
+};
+
+export default UploadZone;

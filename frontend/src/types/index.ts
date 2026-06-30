@@ -1,17 +1,13 @@
-export * from './dataset'
-export * from './chart'
-export * from './chat'
-
 export interface User {
-  id: string
-  email: string
-  full_name?: string
-  role: string
-  company?: string
-  avatar_url?: string
+  id: string;
+  email: string;
 }
 
-export interface ApiError {
-  message: string
-  status?: number
+export interface ApiResponse<T> {
+  data: T;
+  message: string;
+  success: boolean;
 }
+
+export type { Dashboard } from './chart';
+export type { TableData } from './dataset';

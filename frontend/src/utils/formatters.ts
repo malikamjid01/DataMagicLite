@@ -1,15 +1,36 @@
-export const formatBytes = (bytes: number): string => {
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 ** 2) return `${(bytes / 1024).toFixed(1)} KB`
-  if (bytes < 1024 ** 3) return `${(bytes / 1024 ** 2).toFixed(1)} MB`
-  return `${(bytes / 1024 ** 3).toFixed(1)} GB`
-}
+// File size format karo
+export const formatFileSize = (bytes: number): string => {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
 
-export const formatNumber = (n: number): string =>
-  new Intl.NumberFormat().format(n)
+// Date format karo
+export const formatDate = (dateString: string): string => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-PK', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+};
 
-export const formatDate = (iso: string): string =>
-  new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(iso))
+// Time format karo
+export const formatTime = (dateString: string): string => {
+  const date = new Date(dateString);
+  return date.toLocaleTimeString('en-PK', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+};
 
-export const formatPercent = (value: number, total: number): string =>
-  total === 0 ? '0%' : `${Math.round((value / total) * 100)}%`
+// Number format karo
+export const formatNumber = (num: number): string => {
+  return new Intl.NumberFormat('en-PK').format(num);
+};
+
+// Text truncate karo
+export const truncateText = (text: string, maxLength: number): string => {
+  if (text.length <= maxLength) return text;
+  return `${text.substring(0, maxLength)}...`;
+};

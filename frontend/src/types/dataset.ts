@@ -1,23 +1,32 @@
-export interface Dataset {
-  id: string
-  name: string
-  filename: string
-  rows: number
-  columns: number
-  size_bytes: number
-  uploaded_at: string
-  status: 'processing' | 'ready' | 'error'
-}
-
 export interface ColumnInfo {
-  name: string
-  dtype: string
-  null_count: number
-  sample_values: (string | number | null)[]
+  name: string;
+  type: 'numeric' | 'categorical' | 'datetime' | 'text';
+  missing_count: number;
+  unique_count: number;
 }
 
-export interface DatasetPreview {
-  columns: ColumnInfo[]
-  rows: Record<string, unknown>[]
-  total_rows: number
+export interface Dataset {
+  id: string;
+  filename: string;
+  rows: number;
+  columns: number;
+  column_info?: ColumnInfo[];
+  created_at: string;
+}
+
+export interface UploadResponse {
+  id: string;
+  filename: string;
+  rows: number;
+  columns: number;
+  message: string;
+}
+
+export interface TableData {
+  id: string;
+  filename: string;
+  rows: number;
+  columns: number;
+  data: Record<string, unknown>[];
+  column_types: Record<string, string>;
 }

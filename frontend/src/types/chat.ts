@@ -1,16 +1,20 @@
-export type MessageRole = 'user' | 'assistant' | 'system'
-
 export interface Message {
-  id: string
-  role: MessageRole
-  content: string
-  timestamp: string
-  loading?: boolean
+  id: string;
+  session_id: string;
+  role: 'user' | 'assistant';
+  message: string;
+  created_at: string;
 }
 
 export interface ChatSession {
-  id: string
-  dataset_id: string
-  messages: Message[]
-  created_at: string
+  dataset_id: string;
+  session_id: string;
+  messages: Message[];
+  count: number;
+}
+
+export interface ChatResponse {
+  session_id: string;
+  message: string;
+  created_at: string;
 }

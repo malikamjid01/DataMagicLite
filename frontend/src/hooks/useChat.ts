@@ -1,45 +1,70 @@
-import { useState, useCallback } from 'react'
-import { chatApi } from '../api/chat'
-import type { Message } from '../types'
+import { useState } from 'react';
+import type { Message } from '../types';
+import { sendMessage, getChatHistory } from '../api/chat';
 
-export function useChat(datasetId: string) {
-  const [messages, setMessages] = useState<Message[]>([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+const useChat = () => {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const sendMessage = useCallback(async (content: string) => {
-    const userMsg: Message = {
-      id: crypto.randomUUID(),
-      role: 'user',
-      content,
-      timestamp: new Date().toISOString(),
-    }
-    const thinkingMsg: Message = {
-      id: crypto.randomUUID(),
-      role: 'assistant',
-      content: '',
-      timestamp: new Date().toISOString(),
-      loading: true,
-    }
-
-    setMessages(prev => [...prev, userMsg, thinkingMsg])
-    setLoading(true)
-    setError(null)
-
+  const loadHistory = async (datasetId: string) => {
     try {
-      const { reply } = await chatApi.sendMessage(datasetId, content, [...messages, userMsg])
-      setMessages(prev =>
-        prev.map(m => m.id === thinkingMsg.id ? { ...m, content: reply, loading: false } : m)
-      )
-    } catch (e: any) {
-      setMessages(prev => prev.filter(m => m.id !== thinkingMsg.id))
-      setError(e?.response?.data?.detail || 'Chat failed')
+      setIsLoading(true);
+      setError(null);
+      const data = await getChatHistory(datasetId);
+      setMessages(data.messages || []);
+      setSessionId(data.session_id);
+    } catch (err: unknown) {
+      // 404 matlab koi chat nahi — error nahi hai
+      setMessages([]);
     } finally {
-      setLoading(false)
+      setIsLoading(false);
     }
-  }, [datasetId, messages])
+  };
 
-  const clearChat = useCallback(() => setMessages([]), [])
+  const send = async (datasetId: string, message: string) => {
+    try {
+      setIsLoading(true);
+      setError(null);
 
-  return { messages, loading, error, sendMessage, clearChat }
-}
+      // User message turant show karo
+      const userMessage: Message = {
+        id: Date.now().toString(),
+        session_id: sessionId || '',
+        role: 'user',
+        message: message,
+        created_at: new Date().toISOString(),
+      };
+      setMessages((prev) => [...prev, userMessage]);
+
+      // AI response lo
+      const response = await sendMessage(datasetId, message);
+      setSessionId(response.session_id);
+
+      const aiMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        session_id: response.session_id,
+        role: 'assistant',
+        message: response.message,
+        created_at: new Date().toISOString(),
+      };
+      setMessages((prev) => [...prev, aiMessage]);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Message send error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return {
+    messages,
+    sessionId,
+    isLoading,
+    error,
+    loadHistory,
+    send,
+  };
+};
+
+export default useChat;
