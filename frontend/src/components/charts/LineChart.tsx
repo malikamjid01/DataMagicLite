@@ -1,6 +1,4 @@
 import {
-  LineChart as ReLineChart,
-  Line,
   XAxis,
   YAxis,
   CartesianGrid,
